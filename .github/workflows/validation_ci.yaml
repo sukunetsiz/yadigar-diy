@@ -1,0 +1,48 @@
+name: Validation CI
+
+on:
+  push:
+    branches: [ "master" ]
+  pull_request:
+    branches: [ "master" ]
+  workflow_dispatch:
+
+env:
+  TERM: xterm
+
+jobs:
+  ruby-lint:
+    name: Validate with RuboCop
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.0'
+      - name: Install RuboCop
+        run: gem install rubocop
+      - name: Run RuboCop on installer script
+        run: rubocop flash_the_ttgo_tdisplay.rb
+
+  markdown-links:
+    name: Validate Markdown Links
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run markdown-link-check on Documentation
+        uses: gaurav-nelson/github-action-markdown-link-check@v1
+        with:
+          use-verbose-mode: 'yes'
+
+  run-scripts:
+    name: Execute the installer script
+    runs-on: ubuntu-latest
+    needs: [ruby-lint]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install runtime dependency python3-virtualenv
+        run: sudo apt update && sudo apt install -y python3-virtualenv
+      - name: Run flash_the_ttgo_tdisplay.rb
+        run: timeout 300 ruby ./flash_the_ttgo_tdisplay.rb
+

@@ -1,0 +1,5 @@
+cmake
+git
+pip
+virtualenv
+ruby
